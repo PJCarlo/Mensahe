@@ -1,0 +1,51 @@
+import mongoose from "mongoose";
+
+const messageSchema = new mongoose.Schema(
+  {
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    text: {
+      type: String,
+      trim: true,
+      maxlength: 1250,
+    },
+    image: {
+      type: String,
+    },
+    file: {
+      type: String,
+    },
+    size: {
+      type: Number,
+    },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read", "failed"],
+      default: "sent",
+    },
+    deletedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    isDeletedForEveryone: { 
+      type: Boolean, 
+      default: false 
+    },
+    unsentAt: { type: Date },
+  },
+  { timestamps: true }
+);
+
+const Message = mongoose.model("Message", messageSchema);
+
+export default Message;

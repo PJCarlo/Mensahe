@@ -1,70 +1,136 @@
-import { generateToken } from '../lib/utils.js';
+import { generateTokens } from '../lib/utils.js';
+import cloudinary from '../lib/cloudinary.js';
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 
-export const signup = async(req, res) => {
-    const { firstName, lastName, mobile, birthdate, email, password } = req.body;
-    try {
+export const signup = async (req, res) => {
+  const { firstName, lastName, mobile, email, password } = req.body;
 
-        { /* Validate input notice if fields is empty */ }
-        if (!firstName || !lastName || !mobile || !birthdate || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        } 
-        
-        { /* validate password the password must atleaset 8 character length or more */ }
-        if (password.length < 8) {
-            return res.status(400).json({ message: "Password must be at least 8 characters long" });
-        }
-
-        { /* Check if user already exists */ }
-        const user = await User.findOne({ mobile, email });
-        if (user) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = new User({
-            name: {
-                firstName,
-                lastName
-            },
-            mobile,
-            birthdate,
-            email,
-            password: hashedPassword,
-            profilePicture: ""
-        });
-
-        if (newUser) {
-            generateToken(newUser._id, res);
-            await newUser.save();
-            res.status(201).json({
-                message: "Account created successfully",
-                user: {
-                    id: newUser._id,
-                    name: newUser.name,
-                    mobile: newUser.mobile,
-                    birthdate: newUser.birthdate,
-                    email: newUser.email,
-                    profilePicture: newUser.profilePicture
-                }
-            });
-        } else {
-            res.status(500).json({ message: "Failed to create account" });
-        }
-
-    } catch (error) {
-        console.error("Error in signup controller:", error.message);
-        res.status(500).json({ message: "Internal server error" });
+  try {
+    if (!firstName || !lastName || !mobile || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long" });
+    }
+
+    const emailpattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailpattern.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name: { firstName, lastName },
+      mobile,
+      email,
+      password: hashedPassword,
+      profilePicture: ""
+    });
+
+    await newUser.save();
+
+    // Generate tokens + set cookies
+    generateTokens(newUser, res);
+
+    res.status(201).json({
+      message: "Account Created!",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        mobile: newUser.mobile,
+        email: newUser.email,
+        profilePicture: newUser.profilePicture
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in signup controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-export const login = (req, res) => {
-  res.send("login route");
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    generateTokens(user._id, res);
+
+    res.status(200).json({
+      message: "Login Success!",
+      user: {
+        _id: user._id,
+        name: user.name,
+        mobile: user.mobile,
+        email: user.email,
+        profilePicture: user.profilePicture
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in login controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export const logout = (req, res) => {
-  res.send("logout route");
+  try {
+    res.clearCookie("jwt");
+    res.clearCookie("refresh");
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Error in logout controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const {profilePicture} = req.body;
+    const userID = req.user._id
+
+    if(!profilePicture){
+      return res.status(400).json({message: "Profile picture is required"})
+    }
+
+    const upcloudResponse = await cloudinary.uploader.upload(profilePicture);
+    const updatedUser = await User.findByIdAndUpdate(userID, {profilePicture: upcloudResponse.secure_url}, {new: true});
+
+    res.status(200).json({user: updatedUser});
+
+  } catch (error) {
+    console.error("Error in updateProfile:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const checkAuth = async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}

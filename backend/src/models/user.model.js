@@ -19,11 +19,6 @@ const userSchema = new mongoose.Schema({
     unique: true 
   },
 
-  birthdate:{ 
-    type: Date,   
-    required: true 
-  },
-
   email:    { 
     type: String, 
     required: true, 
@@ -45,4 +40,6 @@ const userSchema = new mongoose.Schema({
 
 { timestamps: true });
 
-export default mongoose.model("User", userSchema);
+const Auth = mongoose.model("User", userSchema);
+
+export default Auth;
