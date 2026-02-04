@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 
 import Messages from "./pages/Messages";
+import SignUp from "./pages/SignUpPage";
 import Login from "./pages/LoginPage";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
