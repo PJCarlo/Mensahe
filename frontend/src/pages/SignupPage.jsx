@@ -2,7 +2,7 @@ import {useState} from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { LOGO } from '../src/img/Mensahe_app_LOGO';
 
-const SignupPage = () => {
+const SignUpPage = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -45,4 +45,4 @@ const SignupPage = () => {
 
 };
 
-export default SignupPage;
+export default SignUpPage;

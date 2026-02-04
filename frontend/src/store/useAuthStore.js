@@ -1,5 +1,5 @@
-import {create} from 'zustand';
-import { api as axiosInstance } from '../lib/axios';
+import { create } from 'zustand';
+import { axiosInstance } from '../lib/axios';
 
 export const useAuthStore = create((set) => ({
   authUser: null,
@@ -11,7 +11,7 @@ export const useAuthStore = create((set) => ({
   checkAuth: async () => {
     set({ isCheckingAuth: true });
     try {
-      const response = await axiosInstance.get('/auth/status');
+      const response = await axiosInstance.get('/auth/check');
       set({ authUser: response.data?.user ?? null });
     } catch (error) {
       console.error('checkAuth failed', error);

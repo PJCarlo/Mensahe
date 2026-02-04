@@ -1,27 +1,27 @@
 import Navbar from "./components/Navbar";
 
 import { Routes, Route } from "react-router-dom";
-import { useUserAuthStore } from "./store/userAuthStore";
+import { useAuthStore } from "./store/useAuthStore";
 
-import HomePage from "./pages/HomePage";
-import SignupPage from "./pages/SignupPage";
-import LoginPage from "./pages/LoginPage";
-import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
+import Messages from "./pages/Messages";
+import SignUp from "./pages/SignupPage";
+import Login from "./pages/LoginPage";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
-const App = () => {
-  const { authUser } = useUserAuthStore();
+function App() {
+  
   return (
     <div>
       
       <Navbar />
 
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
 
     </div>
