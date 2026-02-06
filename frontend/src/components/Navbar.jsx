@@ -1,24 +1,11 @@
-import { useAuthStore } from "../store/useAuthStore";
+import useAuthStore from "../store/useAuthStore";
 
-const Navbar = () => {
-  const { authUser } = useAuthStore();
+const NavBar = () => {
     return (
-    <nav>
-      <h1>Mensahe</h1>
-      <ul>
-        {authUser ? (
-          <>
-            <li>Welcome, {authUser.name}</li>
-            <li>Profile</li>
-            <li>Logout</li>
-          </>
-        ) : (
-          <>
-            <li>Login</li>
-            <li>Signup</li>
-          </>
-        )}
-        </ul>
-    </nav>
-  );
+        <div>
+            <h1>Navbar</h1>
+        </div>
+    );
 }
+
+export default NavBar;

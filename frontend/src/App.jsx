@@ -1,31 +1,28 @@
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar.jsx";
 
-import { Routes, Route } from "react-router-dom";
-import { useAuthStore } from "./store/useAuthStore";
+import { Route, Routes } from "react-router-dom";
+import useAuthStore from "./store/useAuthStore.js";
 
-import Messages from "./pages/Messages";
-import SignUp from "./pages/SignUpPage";
-import Login from "./pages/LoginPage";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
+import Messages from "./pages/Messages.jsx";
+import Calls from "./pages/Calls.jsx";
+import Request from "./pages/RequestMessages.jsx";
+import Profile from "./pages/UserProfile.jsx";
+
 
 function App() {
-  
+
+  const { authUser } = useAuthStore();
+
   return (
-    <div>
-      
+    <div className="flex h-screen gap-4 p-4">
       <Navbar />
-
       <Routes>
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Messages />} />
+        <Route path="/calls" element={<Calls />} />
+        <Route path="/requests" element={<Request />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
       </Routes>
-
     </div>
-  )
+  ) 
 }
-
 export default App
