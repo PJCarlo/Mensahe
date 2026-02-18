@@ -28,8 +28,14 @@ const userSchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: true, 
-    minlength: 8 
+    minlength: 16 
   }, 
+
+  gender:   {
+    type: String,
+    enum: ['male', 'female', 'other'],
+    required: true
+  },
 
   profilePicture: { 
     type: String, 

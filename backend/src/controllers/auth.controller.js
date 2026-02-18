@@ -4,10 +4,10 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 
 export const signup = async (req, res) => {
-  const { firstName, lastName, mobile, email, password } = req.body;
+  const { firstName, lastName, mobile, email, gender, password } = req.body;
 
   try {
-    if (!firstName || !lastName || !mobile || !email || !password) {
+    if (!firstName || !lastName || !mobile || !email || !gender || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -32,6 +32,7 @@ export const signup = async (req, res) => {
       name: { firstName, lastName },
       mobile,
       email,
+      gender,
       password: hashedPassword,
       profilePicture: ""
     });
@@ -51,6 +52,7 @@ export const signup = async (req, res) => {
         name: newUser.name,
         mobile: newUser.mobile,
         email: newUser.email,
+        gender: newUser.gender,
         profilePicture: newUser.profilePicture
       }
     });
@@ -88,6 +90,7 @@ export const login = async (req, res) => {
         name: user.name,
         mobile: user.mobile,
         email: user.email,
+        gender: user.gender,
         profilePicture: user.profilePicture
       }
     });
