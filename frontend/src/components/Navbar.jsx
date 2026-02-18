@@ -1,4 +1,3 @@
-import useAuthStore from "../store/useAuthStore";
 
 const NavBar = () => {
     return (
