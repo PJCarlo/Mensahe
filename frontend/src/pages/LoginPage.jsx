@@ -180,12 +180,8 @@ const LoginPage = () => {
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
-                  Password
-                </label>
-
+                <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">Password</label>
                 <div className="relative">
-
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
@@ -204,7 +200,7 @@ const LoginPage = () => {
                     disabled={isLoggingIn}
                   />
 
-                  {/* FACEBOOK STYLE TOGGLE */}
+                  {/* EYE TOGGLE */}
                   {hasValue && (
                     <button
                       type="button"

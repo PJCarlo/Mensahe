@@ -8,6 +8,9 @@ const SignupPage = () => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [profilePreview, setProfilePreview] = useState(null);
+  const [hasValue, setHasValue] = useState(false);
+
+  {/* Data Need to be filled */}
   const [formData, setFormData] = useState({
     fname: '',
     lname: '',
@@ -23,33 +26,47 @@ const SignupPage = () => {
   const { signup, isSigningUp } = useAuthStore();
   const totalSteps = 4;
 
+  {/* Validation Functions for Email it states that the symbols and element below are the only exception */}
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const validatePassword = (password) => {
-    return password.length >= 6;
+  {/* Validation Function for Mobile it states that the symbols, letter and element are not allowed only numbers */}
+  const validateMobile = (mobile) => {
+    return /^\+?\d{10,15}$/.test(mobile);
   };
 
+  {/* Validation Functions for Password it states that the password must be at least 8 characters long */}
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
+
+  {/* Validation function for each step of the form, it checks if the required fields are filled*/}
   const validateStep = (step) => {
     let stepErrors = {};
     
     switch (step) {
       case 1:
+        // Check if first name and last name are not empty
         if (!formData.fname.trim()) stepErrors.fname = 'First name is required';
         if (!formData.lname.trim()) stepErrors.lname = 'Last name is required';
         break;
       case 2:
+        // Check if either email or mobile is provided and valid
         if (!formData.email.trim() && !formData.mobile.trim()) {
           stepErrors.email = 'Email or mobile number is required';
         }
         if (formData.email && !validateEmail(formData.email)) {
           stepErrors.email = 'Please enter a valid email';
         }
+        if (formData.mobile && !validateMobile(formData.mobile)) {
+          stepErrors.mobile = 'Please enter a valid mobile number';
+        }
         break;
       case 3:
+        // Check if password, confirm password, birthday, and gender are valid and not empty
         if (!formData.password) stepErrors.password = 'Password is required';
-        if (!validatePassword(formData.password)) stepErrors.password = 'Password must be at least 6 characters';
+        if (!validatePassword(formData.password)) stepErrors.password = 'Password must be at least 8 characters';
         if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = 'Passwords do not match';
         if (!formData.birthday) stepErrors.birthday = 'Birthday is required';
         if (!formData.gender) stepErrors.gender = 'Gender is required';
@@ -89,10 +106,36 @@ const SignupPage = () => {
     }));
   };
 
+  const markStepTouched = (step) => {
+    const fields = {};
+    switch (step) {
+      case 1:
+        fields.fname = true;
+        fields.lname = true;
+        break;
+      case 2:
+        fields.email = true;
+        fields.mobile = true;
+        break;
+      case 3:
+        fields.password = true;
+        fields.confirmPassword = true;
+        fields.birthday = true;
+        fields.gender = true;
+        break;
+      case 4:
+        fields.profilePicture = true;
+        break;
+    }
+    setTouched((prev) => ({ ...prev, ...fields }));
+  };
+
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(currentStep + 1);
       setErrors({});
+    } else {
+      markStepTouched(currentStep);
     }
   };
 
@@ -217,7 +260,7 @@ const SignupPage = () => {
                         errors.fname ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-green-600'
                       }`}
                     />
-                    {errors.fname && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fname}</p>}
+                    {errors.fname && touched.fname && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fname}</p>}
                   </div>
 
                   <div>
@@ -233,7 +276,7 @@ const SignupPage = () => {
                         errors.lname ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-green-600'
                       }`}
                     />
-                    {errors.lname && <p className="text-red-500 text-xs mt-1 font-medium">{errors.lname}</p>}
+                    {errors.lname && touched.lname && <p className="text-red-500 text-xs mt-1 font-medium">{errors.lname}</p>}
                   </div>
                 </div>
               )}
@@ -256,7 +299,7 @@ const SignupPage = () => {
                         errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-blue-600'
                       }`}
                     />
-                    {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
+                    {errors.email && (touched.email || touched.mobile) && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                   </div>
 
                   <div className="relative">
@@ -295,24 +338,43 @@ const SignupPage = () => {
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        id="password"
                         name="password"
                         value={formData.password}
-                        onChange={handleInputChange}
-                        onBlur={handleBlur}
-                        placeholder="Min 6 characters"
-                        className={`w-full px-4 py-2.5 border-2 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none transition pr-10 ${
-                          errors.password ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-blue-600'
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          setHasValue(e.target.value.length > 0);
+                        }}
+                        placeholder="••••••••"
+                        className={`w-full px-4 py-2.5 border-2 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none transition ${
+                          errors.password 
+                            ? 'border-red-500 focus:border-red-600' 
+                            : 'border-gray-300 focus:border-blue-600'
                         }`}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700 transition"
-                      >
-                        {showPassword ? '🙈' : '👁️'}
-                      </button>
+                      {/* EYE TOGGLE */}
+                      {hasValue && (
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(prev => !prev)}
+                          tabIndex={-1}
+                          className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 active:scale-95 transition"
+                        >
+                          {showPassword ? (
+                            // eye-off
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M2 2l20 20M10.58 10.58A3 3 0 0013.42 13.42M9.88 4.24A10.94 10.94 0 0112 4c5 0 9.27 3.11 11 8-0.7 2.01-1.93 3.76-3.5 5.11M6.1 6.1C3.98 7.72 2.37 9.69 1 12c1.73 4.89 6 8 11 8 1.61 0 3.15-.32 4.56-.9"/>
+                            </svg>
+                          ) : (
+                            // eye
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 5c-5 0-9.27 3.11-11 8 1.73 4.89 6 8 11 8s9.27-3.11 11-8c-1.73-4.89-6-8-11-8zm0 13a5 5 0 110-10 5 5 0 010 10z"/>
+                            </svg>
+                          )}
+                        </button>
+                      )}
                     </div>
-                    {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password}</p>}
+                    {errors.password && touched.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password}</p>}
                   </div>
 
                   <div>
@@ -328,7 +390,7 @@ const SignupPage = () => {
                         errors.confirmPassword ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-blue-600'
                       }`}
                     />
-                    {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 font-medium">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && touched.confirmPassword && <p className="text-red-500 text-xs mt-1 font-medium">{errors.confirmPassword}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-2">
@@ -344,7 +406,7 @@ const SignupPage = () => {
                           errors.birthday ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-blue-600'
                         }`}
                       />
-                      {errors.birthday && <p className="text-red-500 text-xs mt-1 font-medium">{errors.birthday}</p>}
+                      {errors.birthday && touched.birthday && <p className="text-red-500 text-xs mt-1 font-medium">{errors.birthday}</p>}
                     </div>
 
                     <div>
@@ -363,7 +425,7 @@ const SignupPage = () => {
                         <option value="female">Female</option>
                         <option value="other">Other</option>
                       </select>
-                      {errors.gender && <p className="text-red-500 text-xs mt-1 font-medium">{errors.gender}</p>}
+                      {errors.gender && touched.gender && <p className="text-red-500 text-xs mt-1 font-medium">{errors.gender}</p>}
                     </div>
                   </div>
                 </div>
