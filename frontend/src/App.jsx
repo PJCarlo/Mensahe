@@ -30,7 +30,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen gap-4">
+    <div className="flex h-screen bg-zinc-900 gap-4">
       {authUser && <Navbar />}
       <div className="flex-1">
         <Routes>
